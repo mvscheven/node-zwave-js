@@ -1113,6 +1113,7 @@ export class Security2CCMessageEncapsulation extends Security2CC {
 	private authData?: Buffer;
 	private authTag?: Buffer;
 	private ciphertext?: Buffer;
+	private plaintext?: Buffer;
 
 	public readonly verifyDelivery: boolean = true;
 
@@ -1385,6 +1386,8 @@ export class Security2CCMessageEncapsulation extends Security2CC {
 			}
 			if (this.ciphertext) {
 				message.ciphertext = buffer2hex(this.ciphertext);
+			} else if (this.plaintext) {
+				message.plaintext = buffer2hex(this.plaintext);
 			}
 			if (this.authData) {
 				message["auth data"] = buffer2hex(this.authData);
@@ -1420,6 +1423,13 @@ export class Security2CCMessageEncapsulation extends Security2CC {
 				this.host.securityManager2.getKeysForNode(sendingNodeId);
 
 			const iv = nonce;
+
+			console.error(
+				`attempt singlecast decryption.
+	key = ${key.toString("hex")}
+	IV = ${iv.toString("hex")}
+	authData = ${authData.toString("hex")}`,
+			);
 			return {
 				key,
 				iv,
@@ -1552,6 +1562,10 @@ export class Security2CCMessageEncapsulation extends Security2CC {
 		);
 		const { keyCCM: key } =
 			this.host.securityManager2.getKeysForNode(sendingNodeId);
+
+		console.error(
+			`attempt multicast decryption. IV = ${iv.toString("hex")}`,
+		);
 		return {
 			key,
 			iv,
